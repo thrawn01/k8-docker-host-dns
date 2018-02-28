@@ -1,0 +1,17 @@
+# Runs once
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k8-docker-host-dns
+spec:
+  template:
+    spec:
+      hostPID: true
+      hostNetwork: true
+      restartPolicy: Never
+      containers:
+        - name: k8-docker-host-dns
+          image: thrawn01/k8-docker-host-dns:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true

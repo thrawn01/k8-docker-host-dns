@@ -1,0 +1,38 @@
+# Runs once a minute, this ensures /etc/resolv.conf is updated after a K8 reboot
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: k8-docker-host-dns
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostPID: true
+          hostNetwork: true
+          restartPolicy: Never
+          containers:
+            - name: k8-docker-host-dns
+              image: thrawn01/k8-docker-host-dns:latest
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                privileged: true
+---
+# Runs once when job is created
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k8-docker-host-dns
+spec:
+  template:
+    spec:
+      hostPID: true
+      hostNetwork: true
+      restartPolicy: Never
+      containers:
+        - name: k8-docker-host-dns
+          image: thrawn01/k8-docker-host-dns:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
