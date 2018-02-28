@@ -9,14 +9,14 @@ the docker VM host with the appropriate DNS entries such that pods using
 ## How do?
 Starts the container as a one time job
 ```bash
-kubectl create -f https://github.com/thrawn01/k8-docker-host-dns/blob/master/job.yaml
+kubectl create -f https://raw.githubusercontent.com/thrawn01/k8-docker-host-dns/master/job.yaml
 ```
 
 Starts the container as a cron job that will run once every minute. Although
 the container runs every minute it only updates the /etc/resolv.conf file if
 the pod is unable to resolve the 'kubernetes' service name
 ```bash
-kubectl create -f https://github.com/thrawn01/k8-docker-host-dns/blob/master/with-cron.yaml
+kubectl create -f https://raw.githubusercontent.com/thrawn01/k8-docker-host-dns/master/with-cron.yaml
 ```
 
 ## Rational
