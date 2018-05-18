@@ -54,11 +54,21 @@ func main() {
 
 	// Enter PID 1 namespace and replace the /etc/resolv.conf file
 	err = syscall.Exec("/usr/bin/nsenter1", []string{"nsenter1", "/bin/sh", "-c",
-		fmt.Sprintf(`cp /etc/resolv.conf /tmp/resolv.conf; printf "nameserver %s\n`+
-			`nameserver 192.168.65.1\n`+
+		fmt.Sprintf(`cat /etc/resolv.conf | grep fix-host-dns; [ $? -eq 0 ] || `+
+			`(cp /etc/resolv.conf /etc/resolv.bak;`+
+			`rm /etc/resolv.conf;`+ // resolv.conf might be a link to systemd managed version (SEE NOTE)
+			`printf "# Modified by fix-host-dns\n` +
+			`nameserver %s\n`+
+			"`cat /etc/resolv.bak | tail -1`\n"+
 			`search default.svc.cluster.local svc.cluster.local cluster.local\n`+
-			`options ndots:5\n" > /etc/resolv.conf`, clusterIP)}, os.Environ())
+			`options ndots:5\n" > /etc/resolv.conf)`, clusterIP)}, os.Environ())
 	if err != nil {
 		panic(err.Error())
 	}
+
+	// NOTE: systemd-resolved does not support nameserver fall through as defined in man /etc/resolv.conf
+	// and it probably never will. As such we have to remove the link to the systemd managed
+	// resolv.conf so our containers will use our properly formed /etc/resolv.conf file
+	// See https://github.com/systemd/systemd/issues/5755
+
 }
